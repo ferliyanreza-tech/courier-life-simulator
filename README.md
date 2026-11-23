@@ -44,16 +44,20 @@ Dekati penanda paket di area gudang untuk mengambilnya. Setelah paket diambil, i
 Sudah tersedia:
 - Scene 3D lingkungan kota percobaan dengan jalan, bangunan, gudang, dan titik tujuan.
 - Kendaraan kurir sederhana dengan kontrol gerak.
+- Model motor dan kurir low-poly dengan helm, roda, setang, dan paket belakang.
 - Kamera third-person yang mengikuti kendaraan.
-- Alur misi ambil paket → antar paket → hadiah.
-- HUD uang, nomor misi, petunjuk, dan kontrol sentuh.
+- Lingkungan kota percobaan dengan trotoar, pepohonan, marka jalan, dan lampu jalan.
+- Tiga tujuan pengiriman yang bergantian dengan alamat dan nilai hadiah berbeda.
+- Progres uang, XP, reputasi, dan jumlah pengiriman.
+- Penyimpanan progres lokal melalui browser (Zustand persist).
+- HUD uang, nomor misi, alamat tujuan, petunjuk, dan kontrol sentuh.
 
 Belum tersedia:
 - Model karakter dan motor realistis, animasi, serta audio.
 - Fisika kendaraan dan tabrakan yang realistis.
 - Dunia terbuka, lalu lintas, NPC, dan sistem alamat.
-- Inventaris paket, beberapa jenis misi, ekonomi lanjutan, upgrade kendaraan, dan perekrutan staf.
-- Penyimpanan progres dan instalasi Android/PWA.
+- Inventaris paket kompleks, variasi jenis misi, ekonomi lanjutan, upgrade kendaraan, dan perekrutan staf.
+- Sinkronisasi cloud dan instalasi Android/PWA.
 
 Fitur yang belum tersedia di atas merupakan rencana pengembangan, bukan fitur yang sudah selesai.
 
