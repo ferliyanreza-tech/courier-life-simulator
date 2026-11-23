@@ -1,7 +1,7 @@
 import { Canvas } from '@react-three/fiber'
 import { Suspense, useEffect } from 'react'
 import World from './game/World'
-import { useGameStore, type ControlKey } from './game/store'
+import { deliveryStops, useGameStore, type ControlKey } from './game/store'
 
 const controls: { key: ControlKey; label: string; symbol: string }[] = [
   { key: 'forward', label: 'Maju', symbol: '↑' },
@@ -14,6 +14,9 @@ export default function App() {
   const stage = useGameStore((state) => state.missionStage)
   const money = useGameStore((state) => state.money)
   const deliveries = useGameStore((state) => state.deliveries)
+  const experience = useGameStore((state) => state.experience)
+  const reputation = useGameStore((state) => state.reputation)
+  const activeStop = deliveryStops[deliveries % deliveryStops.length]
   const canInteract = useGameStore((state) => state.canInteract)
   const setKey = useGameStore((state) => state.setKey)
   const interact = useGameStore((state) => state.interact)
@@ -74,7 +77,7 @@ export default function App() {
         <p>{stage === 'pickup'
           ? 'Datangi gudang berwarna oranye, lalu tekan E untuk mengambil paket.'
           : stage === 'delivery'
-            ? 'Ikuti penanda hijau menuju rumah pelanggan, lalu tekan E untuk menyelesaikan pengiriman.'
+            ? 'Tujuan: ' + activeStop.name + ' · ' + activeStop.address + '. Dekati penanda hijau, lalu tekan E untuk mengantar paket.'
             : 'Paket berhasil diterima pelanggan. Kerja bagus, kurir!'}
         </p>
         {stage === 'complete' ? (
@@ -87,6 +90,8 @@ export default function App() {
       </section>
 
       <div className="objective-chip"><span className="live-dot" /> KOTA · AREA PERCOBAAN</div>
+
+      <div className="progress-chip"><span>XP <strong>{experience}</strong></span><span>REPUTASI <strong>{reputation}/100</strong></span><span>TERKIRIM <strong>{deliveries}</strong></span></div>
 
       <div className="controls-hint">
         <span><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> Berkendara</span>
