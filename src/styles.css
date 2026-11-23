@@ -1,0 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+  font-family: 'DM Sans', sans-serif;
+  color: #f5f7f8;
+  background: #101a24;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+* { box-sizing: border-box; }
+html, body, #root { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+button { font: inherit; }
+.game-shell { position: relative; width: 100%; height: 100%; min-height: 420px; overflow: hidden; background: #9bc7d8; }
+.game-shell canvas { position: absolute; inset: 0; }
+.topbar { position: absolute; z-index: 2; top: 0; left: 0; right: 0; display: flex; align-items: center; justify-content: space-between; padding: 22px 28px; background: linear-gradient(180deg, rgba(12,22,32,.78), transparent); pointer-events: none; }
+.brand { display: flex; align-items: center; gap: 11px; }
+.brand-mark { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; background: #f2ad3b; color: #1c2730; font: 700 15px 'Space Grotesk'; }
+.brand strong, .brand span, .wallet span, .wallet strong { display: block; }
+.brand strong { font: 700 14px 'Space Grotesk'; letter-spacing: .09em; }
+.brand span, .wallet span, .eyebrow { color: #c2ced5; font-size: 9px; letter-spacing: .14em; font-weight: 700; margin-top: 3px; }
+.wallet { text-align: right; padding: 10px 15px; border: 1px solid rgba(255,255,255,.22); border-radius: 12px; background: rgba(14,27,38,.62); backdrop-filter: blur(12px); }
+.wallet span { margin: 0 0 3px; }
+.wallet strong { font: 700 16px 'Space Grotesk'; color: #f8c66e; }
+.mission-card { position: absolute; z-index: 2; top: 112px; left: 28px; width: min(350px, calc(100% - 56px)); padding: 19px 20px; border: 1px solid rgba(255,255,255,.17); border-radius: 17px; background: rgba(16,27,38,.83); box-shadow: 0 14px 38px rgba(13,25,34,.18); backdrop-filter: blur(14px); }
+.eyebrow { color: #f2b94f; margin: 0 0 9px; }
+.mission-card h1 { margin: 0; font: 700 21px 'Space Grotesk'; line-height: 1.2; }
+.mission-card p { margin: 9px 0 0; color: #c3ced5; font-size: 12px; line-height: 1.55; }
+.mission-hint { display: flex; align-items: center; gap: 9px; margin-top: 15px; color: #f8c66e; font-size: 11px; font-weight: 700; }
+kbd { display: inline-grid; min-width: 23px; height: 23px; place-items: center; padding: 0 5px; border: 1px solid rgba(255,255,255,.3); border-radius: 6px; background: rgba(255,255,255,.1); color: white; font: 700 10px 'DM Sans'; }
+.action-button { margin-top: 14px; padding: 10px 13px; border: 0; border-radius: 9px; background: #f2b94f; color: #1b2831; font-size: 11px; font-weight: 800; cursor: pointer; }
+.objective-chip { position: absolute; right: 25px; top: 112px; display: flex; align-items: center; gap: 8px; padding: 10px 13px; border: 1px solid rgba(255,255,255,.2); border-radius: 30px; background: rgba(16,27,38,.72); color: #eef4f6; font-size: 9px; font-weight: 800; letter-spacing: .1em; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #65d59c; box-shadow: 0 0 10px #65d59c; }
+.controls-hint { position: absolute; z-index: 2; bottom: 25px; left: 28px; display: flex; gap: 18px; color: #fff; font-size: 10px; font-weight: 700; text-shadow: 0 1px 5px #17242e; }
+.controls-hint span { display: flex; align-items: center; gap: 4px; }
+.touch-controls { display: none; }
+.footer-note { position: absolute; right: 25px; bottom: 25px; color: rgba(255,255,255,.8); font-size: 9px; font-weight: 800; letter-spacing: .14em; text-shadow: 0 1px 5px #17242e; }
+.footer-note span { padding: 0 5px; }
+@media (max-width: 700px) {
+  .topbar { padding: 14px; }
+  .brand-mark { width: 34px; height: 34px; }
+  .brand strong { font-size: 11px; }
+  .brand span { font-size: 8px; }
+  .wallet { padding: 8px 10px; }
+  .wallet strong { font-size: 13px; }
+  .mission-card { top: 78px; left: 14px; width: min(285px, calc(100% - 28px)); padding: 14px; }
+  .mission-card h1 { font-size: 17px; }
+  .mission-card p { font-size: 11px; }
+  .objective-chip { top: auto; right: 12px; bottom: 152px; font-size: 8px; }
+  .controls-hint { display: none; }
+  .touch-controls { position: absolute; z-index: 3; left: 15px; right: 15px; bottom: 24px; display: grid; grid-template-columns: repeat(4, 48px) 1fr; gap: 8px; align-items: center; }
+  .touch-key, .touch-interact { height: 48px; border: 1px solid rgba(255,255,255,.32); border-radius: 13px; background: rgba(15,27,38,.78); color: white; font-size: 20px; font-weight: 800; touch-action: none; backdrop-filter: blur(8px); }
+  .touch-key:active, .touch-interact:active { background: #e9a83c; color: #18232c; }
+  .touch-interact { justify-self: end; width: 70px; font-size: 10px; letter-spacing: .08em; background: #e9a83c; color: #18232c; }
+  .footer-note { right: 14px; bottom: 84px; font-size: 8px; }
+}
+@media (max-height: 540px) and (min-width: 701px) {
+  .mission-card { top: 85px; }
+  .topbar { padding-top: 12px; }
+}
+
+.progress-chip {
+  position: absolute;
+  z-index: 2;
+  top: 174px;
+  right: 25px;
+  display: flex;
+  gap: 14px;
+  padding: 11px 14px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 12px;
+  background: rgba(16,27,38,.72);
+  color: #c7d2d9;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  backdrop-filter: blur(10px);
+}
+.progress-chip span { display: flex; gap: 5px; align-items: center; }
+.progress-chip strong { color: #f5c66c; font: 700 12px 'Space Grotesk'; }
+.touch-interact:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 700px) {
+  .progress-chip {
+    top: auto;
+    right: 12px;
+    bottom: 207px;
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .progress-chip strong { font-size: 10px; }
+}
