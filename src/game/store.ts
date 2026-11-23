@@ -7,7 +7,9 @@ type GameState = {
   missionStage: 'pickup' | 'delivery' | 'complete'
   money: number
   deliveries: number
+  canInteract: boolean
   setKey: (key: ControlKey, pressed: boolean) => void
+  setInteractEnabled: (enabled: boolean) => void
   interact: () => void
   resetMission: () => void
 }
@@ -17,17 +19,23 @@ export const useGameStore = create<GameState>((set, get) => ({
   missionStage: 'pickup',
   money: 0,
   deliveries: 0,
+  canInteract: false,
   setKey: (key, pressed) => set((state) => ({
     keys: { ...state.keys, [key]: pressed },
   })),
+  setInteractEnabled: (enabled) => {
+    if (get().canInteract !== enabled) set({ canInteract: enabled })
+  },
   interact: () => {
-    const stage = get().missionStage
-    if (stage === 'pickup') set({ missionStage: 'delivery' })
-    if (stage === 'delivery') set((state) => ({
+    const { missionStage, canInteract } = get()
+    if (!canInteract) return
+    if (missionStage === 'pickup') set({ missionStage: 'delivery', canInteract: false })
+    if (missionStage === 'delivery') set((state) => ({
       missionStage: 'complete',
+      canInteract: false,
       money: state.money + 75000,
       deliveries: state.deliveries + 1,
     }))
   },
-  resetMission: () => set({ missionStage: 'pickup' }),
+  resetMission: () => set({ missionStage: 'pickup', canInteract: false }),
 }))
