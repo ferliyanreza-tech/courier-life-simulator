@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float, Text } from '@react-three/drei'
 import * as THREE from 'three'
@@ -53,7 +53,7 @@ function ParcelMarker({ position, label, color }: {
   )
 }
 
-function CourierBike({ bikeRef }: { bikeRef: React.RefObject<THREE.Group | null> }) {
+function CourierBike({ bikeRef }: { bikeRef: RefObject<THREE.Group | null> }) {
   const velocity = useRef(0)
   const heading = useRef(0)
   const keys = useGameStore((state) => state.keys)
@@ -104,7 +104,7 @@ function CourierBike({ bikeRef }: { bikeRef: React.RefObject<THREE.Group | null>
 export default function World() {
   const stage = useGameStore((state) => state.missionStage)
   const interact = useGameStore((state) => state.interact)
-  const bikeRef = useRef<THREE.Group>(null)
+  const bikeRef = useRef<THREE.Group | null>(null)
   const pickup = useMemo(() => new THREE.Vector3(-7, 0, -5), [])
   const dropoff = useMemo(() => new THREE.Vector3(8, 0, -8), [])
 
