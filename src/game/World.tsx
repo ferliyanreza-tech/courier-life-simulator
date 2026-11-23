@@ -53,9 +53,13 @@ function ParcelMarker({ position, label, color }: {
   )
 }
 
-function CourierBike({ bikeRef }: { bikeRef: RefObject<THREE.Group | null> }) {
+function CourierBike({ bikeRef, hasParcel }: {
+  bikeRef: RefObject<THREE.Group | null>
+  hasParcel: boolean
+}) {
   const velocity = useRef(0)
   const heading = useRef(0)
+  const steerValue = useRef(0)
   const keys = useGameStore((state) => state.keys)
 
   useFrame((_, delta) => {
@@ -64,39 +68,101 @@ function CourierBike({ bikeRef }: { bikeRef: RefObject<THREE.Group | null> }) {
     const dt = Math.min(delta, 0.05)
     velocity.current = THREE.MathUtils.damp(
       velocity.current,
-      keys.forward ? 7 : keys.backward ? -2.5 : 0,
-      2.2,
+      keys.forward ? 8.5 : keys.backward ? -3 : 0,
+      keys.forward || keys.backward ? 2.4 : 1.25,
       dt,
     )
     const steer = (keys.left ? 1 : 0) - (keys.right ? 1 : 0)
-    if (Math.abs(velocity.current) > 0.12) heading.current += steer * dt * 1.65 * Math.sign(velocity.current)
+    steerValue.current = THREE.MathUtils.damp(steerValue.current, steer, 7, dt)
+    if (Math.abs(velocity.current) > 0.12) {
+      heading.current += steerValue.current * dt * 1.45 * Math.sign(velocity.current)
+    }
     bike.rotation.y = heading.current
     bike.position.x += Math.sin(heading.current) * velocity.current * dt
     bike.position.z += Math.cos(heading.current) * velocity.current * dt
     bike.position.x = THREE.MathUtils.clamp(bike.position.x, -18, 18)
     bike.position.z = THREE.MathUtils.clamp(bike.position.z, -18, 18)
+    bike.rotation.z = THREE.MathUtils.damp(bike.rotation.z, -steerValue.current * 0.12, 5, dt)
   })
 
   return (
     <group ref={bikeRef} position={[0, 0, 7]}>
+      {/* Motorcycle frame and body */}
       <mesh position={[0, 0.55, 0]} castShadow>
-        <boxGeometry args={[0.38, 0.48, 1.05]} />
-        <meshStandardMaterial color="#e84a35" metalness={0.2} roughness={0.5} />
+        <boxGeometry args={[0.3, 0.25, 0.9]} />
+        <meshStandardMaterial color="#263746" metalness={0.55} roughness={0.4} />
       </mesh>
-      <mesh position={[0, 1.05, -0.12]} castShadow>
-        <boxGeometry args={[0.48, 0.52, 0.48]} />
-        <meshStandardMaterial color="#f0a52f" />
+      <mesh position={[0, 0.72, 0.04]} castShadow>
+        <boxGeometry args={[0.42, 0.42, 0.62]} />
+        <meshStandardMaterial color="#e84a35" metalness={0.18} roughness={0.42} />
       </mesh>
-      {[[-0.25, 0.34, 0.55], [0.25, 0.34, 0.55], [-0.25, 0.34, -0.55], [0.25, 0.34, -0.55]].map(([x, y, z], index) => (
-        <mesh key={index} position={[x, y, z]} rotation={[0, 0, Math.PI / 2]} castShadow>
-          <cylinderGeometry args={[0.23, 0.23, 0.12, 16]} />
-          <meshStandardMaterial color="#20252a" />
-        </mesh>
+      <mesh position={[0, 0.94, -0.34]} castShadow>
+        <boxGeometry args={[0.42, 0.18, 0.42]} />
+        <meshStandardMaterial color="#202a33" roughness={0.6} />
+      </mesh>
+      <mesh position={[0, 0.84, 0.46]}>
+        <sphereGeometry args={[0.13, 16, 12]} />
+        <meshStandardMaterial color="#fff0b5" emissive="#f5c66a" emissiveIntensity={0.45} />
+      </mesh>
+      {/* Two wheels with visible tires and hubs */}
+      {[-0.68, 0.68].map((z) => (
+        <group key={z} position={[0, 0.34, z]} rotation={[0, Math.PI / 2, 0]}>
+          <mesh rotation={[0, 0, Math.PI / 2]} castShadow>
+            <torusGeometry args={[0.255, 0.075, 10, 24]} />
+            <meshStandardMaterial color="#171b20" roughness={0.95} />
+          </mesh>
+          <mesh rotation={[0, 0, Math.PI / 2]}>
+            <cylinderGeometry args={[0.16, 0.16, 0.13, 16]} />
+            <meshStandardMaterial color="#aab4ba" metalness={0.72} roughness={0.3} />
+          </mesh>
+        </group>
       ))}
-      <mesh position={[0, 0.96, 0.2]} castShadow>
-        <sphereGeometry args={[0.22, 16, 16]} />
-        <meshStandardMaterial color="#273b4c" />
+      {/* Front fork and handlebars */}
+      <mesh position={[0, 0.61, 0.57]} rotation={[0.18, 0, 0]}>
+        <cylinderGeometry args={[0.045, 0.045, 0.62, 10]} />
+        <meshStandardMaterial color="#aeb9c0" metalness={0.8} />
       </mesh>
+      <mesh position={[0, 1.02, 0.48]} rotation={[0, 0, Math.PI / 2]}>
+        <cylinderGeometry args={[0.035, 0.035, 0.72, 10]} />
+        <meshStandardMaterial color="#20272d" metalness={0.55} />
+      </mesh>
+      {/* Courier rider: jacket, arms, legs and helmet */}
+      <mesh position={[0, 1.22, -0.12]} rotation={[0.22, 0, 0]} castShadow>
+        <capsuleGeometry args={[0.24, 0.42, 5, 10]} />
+        <meshStandardMaterial color="#f0a52f" roughness={0.72} />
+      </mesh>
+      <mesh position={[0, 1.67, -0.16]} castShadow>
+        <sphereGeometry args={[0.2, 16, 14]} />
+        <meshStandardMaterial color="#273b4c" roughness={0.48} />
+      </mesh>
+      <mesh position={[0, 1.7, -0.015]}>
+        <sphereGeometry args={[0.15, 16, 12]} />
+        <meshStandardMaterial color="#dce8eb" metalness={0.22} roughness={0.3} />
+      </mesh>
+      {[-1, 1].map((side) => (
+        <group key={side}>
+          <mesh position={[side * 0.28, 1.15, 0.2]} rotation={[0.8, 0, side * -0.55]} castShadow>
+            <capsuleGeometry args={[0.075, 0.38, 4, 8]} />
+            <meshStandardMaterial color="#e9a13a" />
+          </mesh>
+          <mesh position={[side * 0.16, 0.48, -0.38]} rotation={[0.7, 0, side * 0.18]} castShadow>
+            <capsuleGeometry args={[0.09, 0.36, 4, 8]} />
+            <meshStandardMaterial color="#263746" />
+          </mesh>
+        </group>
+      ))}
+      {hasParcel && (
+        <group position={[0, 1.13, -0.56]}>
+          <mesh castShadow>
+            <boxGeometry args={[0.48, 0.42, 0.42]} />
+            <meshStandardMaterial color="#c98b48" />
+          </mesh>
+          <mesh position={[0, 0, 0.214]}>
+            <boxGeometry args={[0.1, 0.43, 0.012]} />
+            <meshStandardMaterial color="#f5e5c5" />
+          </mesh>
+        </group>
+      )}
     </group>
   )
 }
@@ -171,7 +237,7 @@ export default function World() {
       <Building position={[8, 0, -8]} color="#9fb9d0" scale={[3.5, 2.8, 3.5]} />
       {stage === 'pickup' && <ParcelMarker position={[-7, 1.8, -5]} label="AMBIL PAKET" color="#f4b942" />}
       {stage === 'delivery' && <ParcelMarker position={[8, 3.2, -8]} label="TUJUAN PAKET" color="#48b889" />}
-      <CourierBike bikeRef={bikeRef} />
+      <CourierBike bikeRef={bikeRef} hasParcel={stage === 'delivery'} />
     </>
   )
 }
