@@ -14,6 +14,7 @@ export default function App() {
   const stage = useGameStore((state) => state.missionStage)
   const money = useGameStore((state) => state.money)
   const deliveries = useGameStore((state) => state.deliveries)
+  const canInteract = useGameStore((state) => state.canInteract)
   const setKey = useGameStore((state) => state.setKey)
   const interact = useGameStore((state) => state.interact)
   const resetMission = useGameStore((state) => state.resetMission)
@@ -79,7 +80,9 @@ export default function App() {
         {stage === 'complete' ? (
           <button className="action-button" onClick={resetMission}>Mulai misi berikutnya ↗</button>
         ) : (
-          <div className="mission-hint"><kbd>E</kbd><span>{stage === 'pickup' ? 'Ambil paket' : 'Serahkan paket'}</span></div>
+          <div className="mission-hint">
+            <kbd>E</kbd><span>{canInteract ? (stage === 'pickup' ? 'Ambil paket' : 'Serahkan paket') : 'Dekati penanda tujuan'}</span>
+          </div>
         )}
       </section>
 
@@ -102,7 +105,7 @@ export default function App() {
             onContextMenu={(event) => event.preventDefault()}
           >{symbol}</button>
         ))}
-        <button className="touch-interact" onClick={interact}>AKSI</button>
+        <button className="touch-interact" onClick={interact} disabled={!canInteract}>AKSI</button>
       </div>
 
       <footer className="footer-note">BUILD 0.1.0 <span>•</span> VERTICAL SLICE</footer>
