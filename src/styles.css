@@ -58,3 +58,35 @@ kbd { display: inline-grid; min-width: 23px; height: 23px; place-items: center; 
   .mission-card { top: 85px; }
   .topbar { padding-top: 12px; }
 }
+
+.progress-chip {
+  position: absolute;
+  z-index: 2;
+  top: 174px;
+  right: 25px;
+  display: flex;
+  gap: 14px;
+  padding: 11px 14px;
+  border: 1px solid rgba(255,255,255,.2);
+  border-radius: 12px;
+  background: rgba(16,27,38,.72);
+  color: #c7d2d9;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  backdrop-filter: blur(10px);
+}
+.progress-chip span { display: flex; gap: 5px; align-items: center; }
+.progress-chip strong { color: #f5c66c; font: 700 12px 'Space Grotesk'; }
+.touch-interact:disabled { opacity: .45; cursor: not-allowed; }
+@media (max-width: 700px) {
+  .progress-chip {
+    top: auto;
+    right: 12px;
+    bottom: 207px;
+    gap: 8px;
+    padding: 8px 10px;
+    font-size: 8px;
+  }
+  .progress-chip strong { font-size: 10px; }
+}
