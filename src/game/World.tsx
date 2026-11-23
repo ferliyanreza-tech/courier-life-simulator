@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, type RefObject } from 'react'
 import { useFrame } from '@react-three/fiber'
 import { Float, Text } from '@react-three/drei'
 import * as THREE from 'three'
-import { useGameStore } from './store'
+import { deliveryStops, useGameStore } from './store'
 
 function Building({ position, color, scale = [1, 1, 1] }: {
   position: [number, number, number]
@@ -172,7 +172,9 @@ export default function World() {
   const interact = useGameStore((state) => state.interact)
   const bikeRef = useRef<THREE.Group | null>(null)
   const pickup = useMemo(() => new THREE.Vector3(-7, 0, -5), [])
-  const dropoff = useMemo(() => new THREE.Vector3(8, 0, -8), [])
+  const deliveries = useGameStore((state) => state.deliveries)
+  const activeStop = deliveryStops[deliveries % deliveryStops.length]
+  const dropoff = useMemo(() => new THREE.Vector3(...activeStop.position), [activeStop])
 
   useFrame(({ camera }, delta) => {
     const bike = bikeRef.current
@@ -223,6 +225,55 @@ export default function World() {
           <meshBasicMaterial color="#f4e8b9" />
         </mesh>
       ))}
+      {/* Sidewalks and small-town street details */}
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, 5.35]}>
+        <planeGeometry args={[60, 1.1]} />
+        <meshStandardMaterial color="#c8c2b3" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.015, -5.35]}>
+        <planeGeometry args={[60, 1.1]} />
+        <meshStandardMaterial color="#c8c2b3" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[5.35, -0.015, 0]}>
+        <planeGeometry args={[1.1, 60]} />
+        <meshStandardMaterial color="#c8c2b3" />
+      </mesh>
+      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[-5.35, -0.015, 0]}>
+        <planeGeometry args={[1.1, 60]} />
+        <meshStandardMaterial color="#c8c2b3" />
+      </mesh>
+      {Array.from({ length: 9 }, (_, i) => (
+        <mesh key={i} rotation={[-Math.PI / 2, 0, 0]} position={[-24 + i * 6, 0.008, 0]}>
+          <planeGeometry args={[2.4, 0.16]} />
+          <meshBasicMaterial color="#f4e8b9" />
+        </mesh>
+      ))}
+      {[[ -17, -17], [17, -18], [-18, 17], [18, 18], [-22, -8], [22, 8], [-8, 22], [8, -22]].map(([x, z], index) => (
+        <group key={index} position={[x, 0, z]}>
+          <mesh position={[0, 1.15, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.13, 2.3, 7]} />
+            <meshStandardMaterial color="#72563b" />
+          </mesh>
+          <mesh position={[0, 2.45, 0]} castShadow>
+            <sphereGeometry args={[0.85, 10, 8]} />
+            <meshStandardMaterial color={index % 2 ? '#39764b' : '#4b8953'} roughness={1} />
+          </mesh>
+        </group>
+      ))}
+      <group position={[4.6, 0, -4.6]}>
+        <mesh position={[0, 2.1, 0]}>
+          <cylinderGeometry args={[0.045, 0.07, 4.2, 8]} />
+          <meshStandardMaterial color="#303b43" metalness={0.55} />
+        </mesh>
+        <mesh position={[-0.45, 4.05, 0]}>
+          <boxGeometry args={[0.95, 0.12, 0.12]} />
+          <meshStandardMaterial color="#303b43" metalness={0.55} />
+        </mesh>
+        <mesh position={[-0.85, 3.92, 0]}>
+          <sphereGeometry args={[0.19, 10, 8]} />
+          <meshStandardMaterial color="#fff0b5" emissive="#f8d78a" emissiveIntensity={0.7} />
+        </mesh>
+      </group>
       <Building position={[-10, 0, -10]} color="#e8c49a" scale={[5, 3.4, 5]} />
       <Building position={[10, 0, -13]} color="#d9a68e" scale={[5, 4.6, 4]} />
       <Building position={[-12, 0, 9]} color="#d6d2b8" scale={[4, 2.8, 5]} />
@@ -234,9 +285,9 @@ export default function World() {
         </mesh>
         <Text position={[0, 1.55, 1.56]} fontSize={0.32} color="#25313b" anchorX="center">GUDANG KURIR</Text>
       </group>
-      <Building position={[8, 0, -8]} color="#9fb9d0" scale={[3.5, 2.8, 3.5]} />
+      <Building position={activeStop.position} color="#9fb9d0" scale={[3.5, 2.8, 3.5]} />
       {stage === 'pickup' && <ParcelMarker position={[-7, 1.8, -5]} label="AMBIL PAKET" color="#f4b942" />}
-      {stage === 'delivery' && <ParcelMarker position={[8, 3.2, -8]} label="TUJUAN PAKET" color="#48b889" />}
+      {stage === 'delivery' && <ParcelMarker position={[activeStop.position[0], 3.2, activeStop.position[2]]} label="TUJUAN PAKET" color="#48b889" />}
       <CourierBike bikeRef={bikeRef} hasParcel={stage === 'delivery'} />
     </>
   )
