@@ -53,36 +53,32 @@ function ParcelMarker({ position, label, color }: {
   )
 }
 
-function CourierBike() {
-  const group = useRef<THREE.Group>(null)
+function CourierBike({ bikeRef }: { bikeRef: React.RefObject<THREE.Group | null> }) {
   const velocity = useRef(0)
   const heading = useRef(0)
   const keys = useGameStore((state) => state.keys)
 
   useFrame((_, delta) => {
-    if (!group.current) return
+    const bike = bikeRef.current
+    if (!bike) return
     const dt = Math.min(delta, 0.05)
-    const accelerating = keys.forward
-    const braking = keys.backward
     velocity.current = THREE.MathUtils.damp(
       velocity.current,
-      accelerating ? 7 : braking ? -2.5 : 0,
+      keys.forward ? 7 : keys.backward ? -2.5 : 0,
       2.2,
       dt,
     )
     const steer = (keys.left ? 1 : 0) - (keys.right ? 1 : 0)
-    if (Math.abs(velocity.current) > 0.12) {
-      heading.current += steer * dt * 1.65 * Math.sign(velocity.current)
-    }
-    group.current.rotation.y = heading.current
-    group.current.position.x += Math.sin(heading.current) * velocity.current * dt
-    group.current.position.z += Math.cos(heading.current) * velocity.current * dt
-    group.current.position.x = THREE.MathUtils.clamp(group.current.position.x, -18, 18)
-    group.current.position.z = THREE.MathUtils.clamp(group.current.position.z, -18, 18)
+    if (Math.abs(velocity.current) > 0.12) heading.current += steer * dt * 1.65 * Math.sign(velocity.current)
+    bike.rotation.y = heading.current
+    bike.position.x += Math.sin(heading.current) * velocity.current * dt
+    bike.position.z += Math.cos(heading.current) * velocity.current * dt
+    bike.position.x = THREE.MathUtils.clamp(bike.position.x, -18, 18)
+    bike.position.z = THREE.MathUtils.clamp(bike.position.z, -18, 18)
   })
 
   return (
-    <group ref={group} position={[0, 0, 7]}>
+    <group ref={bikeRef} position={[0, 0, 7]}>
       <mesh position={[0, 0.55, 0]} castShadow>
         <boxGeometry args={[0.38, 0.48, 1.05]} />
         <meshStandardMaterial color="#e84a35" metalness={0.2} roughness={0.5} />
@@ -105,23 +101,29 @@ function CourierBike() {
   )
 }
 
-function FollowCamera() {
-  const bike = useRef<THREE.Group>(null)
-  // The camera follows a stable chase position while the bike moves around the test block.
-  useFrame(({ camera }, delta) => {
-    const target = new THREE.Vector3(0, 5.2, 13)
-    camera.position.lerp(target, 1 - Math.exp(-2 * delta))
-    camera.lookAt(0, 0, 0)
-  })
-  return <group ref={bike} />
-}
-
 export default function World() {
   const stage = useGameStore((state) => state.missionStage)
   const interact = useGameStore((state) => state.interact)
-  const bikePosition = useRef(new THREE.Vector3(0, 0, 7))
+  const bikeRef = useRef<THREE.Group>(null)
   const pickup = useMemo(() => new THREE.Vector3(-7, 0, -5), [])
   const dropoff = useMemo(() => new THREE.Vector3(8, 0, -8), [])
+
+  useFrame(({ camera }, delta) => {
+    const bike = bikeRef.current
+    if (!bike) return
+    const target = stage === 'pickup' ? pickup : dropoff
+    const distance = bike.position.distanceTo(target)
+    useGameStore.getState().setInteractEnabled(stage !== 'complete' && distance < 3.2)
+
+    const heading = bike.rotation.y
+    const desiredCamera = new THREE.Vector3(
+      bike.position.x - Math.sin(heading) * 7,
+      bike.position.y + 5.2,
+      bike.position.z + Math.cos(heading) * 7,
+    )
+    camera.position.lerp(desiredCamera, 1 - Math.exp(-3 * delta))
+    camera.lookAt(bike.position.x, bike.position.y + 0.7, bike.position.z)
+  })
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
@@ -169,8 +171,7 @@ export default function World() {
       <Building position={[8, 0, -8]} color="#9fb9d0" scale={[3.5, 2.8, 3.5]} />
       {stage === 'pickup' && <ParcelMarker position={[-7, 1.8, -5]} label="AMBIL PAKET" color="#f4b942" />}
       {stage === 'delivery' && <ParcelMarker position={[8, 3.2, -8]} label="TUJUAN PAKET" color="#48b889" />}
-      <CourierBike />
-      <FollowCamera />
+      <CourierBike bikeRef={bikeRef} />
     </>
   )
 }
